@@ -1,5 +1,5 @@
 <?php
-defined('ABSPATH') || die();
+defined('ABSPATH') || exit;
 
 if (isset($_REQUEST['dismiss']) && check_admin_referer()) {
     $dismissed[$_REQUEST['dismiss']] = 1;
@@ -10,7 +10,7 @@ if (isset($_REQUEST['dismiss']) && check_admin_referer()) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && check_admin_referer('thumbnails-save')) {
     if (isset($_POST['save'])) {
-        Thumbnails::$instance->options = stripslashes_deep($_POST['options']);
+        Thumbnails::$instance->options = wp_unslash($_POST['options']);
         update_option('thumbnails', Thumbnails::$instance->options);
     }
 }
@@ -18,7 +18,7 @@ $options = Thumbnails::$instance->options;
 ?>
 
 <style>
-    <?php include __DIR__ . '/admin.css' ?>
+<?php include __DIR__ . '/admin.css' ?>
 </style>
 
 <div class="wrap">
@@ -27,111 +27,113 @@ $options = Thumbnails::$instance->options;
     <?php if (!isset($dismissed['newsletter'])) { ?>
         <div class="notice notice-success"><p>
                 If you want to be informed of important updated of this plugin, you may want to subscribe to my (rare) newsletter<br>
-            <form action="http://www.satollo.net/?na=s" target="_blank" method="post">
+            <form action="https://www.satollo.net/?na=s" target="_blank" method="post">
                 <input type="hidden" value="header-footer" name="nr">
                 <input type="hidden" value="4" name="nl[]">
-                <input type="email" name="ne" value="<?php echo esc_attr(get_option('admin_email'))?>" size="30">
-                <input type="submit" value="<?php echo esc_attr_e('Subscribe', 'thumbnails')?>">
+                <input type="email" name="ne" value="<?= esc_attr(get_option('admin_email')) ?>" size="30">
+                <input type="submit" value="<?php esc_attr_e('Subscribe', 'thumbnails') ?>">
             </form>
-            <a class="thumbnails-dismiss" href="<?php echo wp_nonce_url($_SERVER['REQUEST_URI'] . '&dismiss=newsletter&noheader=1') ?>">&times;</a>
-            </p>   
+            <a class="thumbnails-dismiss" href="<?= esc_attr(wp_nonce_url($_SERVER['REQUEST_URI'] . '&dismiss=newsletter&noheader=1')) ?>">&times;</a>
+            </p>
         </div>
-    <?php } ?>   
+    <?php } ?>
 
     <p>
-        <?php printf(__('Please take <strong>few seconds</strong> to read the <a href="%s" target="_blank">Thumbnails official page</a>.', 'thumbnails'), 
-                'http://www.satollo.net/plugins/thumbnails') ?> 
+        <?php
+        printf(wp_kses_post(__('Please take <strong>few seconds</strong> to read the <a href="%s" target="_blank">Thumbnails official page</a>.', 'thumbnails')),
+                'https://www.satollo.net/plugins/thumbnails')
+        ?>
     </p>
     <p>
-        Consider a small <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5PHGDGNHAYLJ8" target="_blank">donation</a> and 
-        <a href="http://www.satollo.net/donations" target="_blank">discover why it is doubly important</a>.
+        Consider a small <a href="https://www.paypal.com/cgi-bin/webscr?cmd=s-xclick&hosted_button_id=5PHGDGNHAYLJ8" target="_blank">donation</a> and
+        <a href="https://www.satollo.net/donations" target="_blank">discover why it is doubly important</a>.
     </p>
-    
+
     <p>
-        <?php _e('Other useful plugins', 'thumbnails') ?>:
-        <a href="http://www.satollo.net/plugins/comment-plus?utm_source=thumbnails&utm_medium=link&utm_campaign=comment-plus" target="_blank">Comment Plus</a>,
-        <a href="http://www.satollo.net/plugins/hyper-cache?utm_source=thumbnails&utm_medium=link&utm_campaign=hyper-cache" target="_blank">Hyper Cache</a>,
-        <a href="http://www.thenewsletterplugin.com/?utm_source=thumbnails&utm_medium=link&utm_campaign=newsletter" target="_blank">Newsletter</a>,
-        <a href="http://www.satollo.net/plugins/header-footer?utm_source=thumbnails&utm_medium=link&utm_campaign=header-footer" target="_blank">Header and footer</a>,
-        <a href="http://www.satollo.net/plugins/include-me?utm_source=thumbnails&utm_medium=link&utm_campaign=include-me" target="_blank">Include Me</a>,
-        <a href="http://www.satollo.net/plugins/ads-bbpress?utm_source=thumbnails&utm_medium=link&utm_campaign=ads-bbpress" target="_blank">Ads for bbPress</a>.
-    </p>     
-   
-    <h3><?php _e('Configuration', 'thumbnails') ?></h3>
+        <?php esc_html_e('Other useful plugins', 'thumbnails') ?>:
+        <a href="https://www.satollo.net/plugins/comment-plus?utm_source=thumbnails&utm_medium=link&utm_campaign=comment-plus" target="_blank">Comment Plus</a>,
+        <a href="https://www.satollo.net/plugins/hyper-cache?utm_source=thumbnails&utm_medium=link&utm_campaign=hyper-cache" target="_blank">Hyper Cache</a>,
+        <a href="https://www.thenewsletterplugin.com/?utm_source=thumbnails&utm_medium=link&utm_campaign=newsletter" target="_blank">Newsletter</a>,
+        <a href="https://www.satollo.net/plugins/header-footer?utm_source=thumbnails&utm_medium=link&utm_campaign=header-footer" target="_blank">Header and footer</a>,
+        <a href="https://www.satollo.net/plugins/include-me?utm_source=thumbnails&utm_medium=link&utm_campaign=include-me" target="_blank">Include Me</a>,
+        <a href="https://www.satollo.net/plugins/ads-bbpress?utm_source=thumbnails&utm_medium=link&utm_campaign=ads-bbpress" target="_blank">Ads for bbPress</a>.
+    </p>
+
+    <h3><?php esc_html_e('Configuration', 'thumbnails') ?></h3>
 
     <form action="" method="post">
         <?php wp_nonce_field('thumbnails-save'); ?>
         <table class="form-table">
             <tr>
-                <th><?php _e('Featured image auto selection', 'thumbnails') ?></th>
+                <th><?php esc_html_e('Featured image auto selection', 'thumbnails') ?></th>
                 <td>
                     <label>
-                        <input name="options[enable_autowire]" type="checkbox" <?php echo isset($options['enable_autowire']) ? 'checked' : ''; ?>> 
+                        <input name="options[enable_autowire]" type="checkbox" <?= isset($options['enable_autowire']) ? 'checked' : ''; ?>>
                     </label>
 
                 </td>
             </tr>
             <tr>
-                <th><?php _e('Auto feature image persistence', 'thumbnails') ?></th>
+                <th><?php esc_html_e('Auto feature image persistence', 'thumbnails') ?></th>
                 <td>
                     <label>
-                        <input name="options[enable_persistence]" type="checkbox" <?php echo isset($options['enable_persistence']) ? 'checked' : ''; ?>> 
+                        <input name="options[enable_persistence]" type="checkbox" <?= isset($options['enable_persistence']) ? 'checked' : ''; ?>>
                     </label>
                     <p class="description">
-                        <?php _e('When a featured image is extracted by this plugin, make it persistent to improve performances', 'thumbnails') ?>.
-                        <a href="http://www.satollo.net/plugins/thumbnails" target="_blank"><?php _e('Read more', 'thumbnails') ?></a>.
+                        <?php esc_html_e('When a featured image is extracted by this plugin, make it persistent to improve performances', 'thumbnails') ?>.
+                        <a href="http://www.satollo.net/plugins/thumbnails" target="_blank"><?php esc_html_e('Read more', 'thumbnails') ?></a>.
                     </p>
                 </td>
             </tr>
             <tr>
-                <th><?php _e('Enable on the fly thumbnail generation', 'thumbnails') ?></th>
+                <th><?php esc_html_e('Enable on the fly thumbnail generation', 'thumbnails') ?></th>
                 <td>
                     <label>
-                        <input name="options[enable_downsize]" type="checkbox" <?php echo isset($options['enable_downsize']) ? 'checked' : ''; ?>> 
+                        <input name="options[enable_downsize]" type="checkbox" <?= isset($options['enable_downsize']) ? 'checked' : ''; ?>>
                     </label>
                     <p class="description">
-                        <?php _e('Cache folder:', 'thumbnails') ?> <code><?php echo WP_CONTENT_DIR ?>/cache/thumbnails</code>
+                        <?php esc_html_e('Cache folder:', 'thumbnails') ?> <code><?= esc_html(WP_CONTENT_DIR) ?>/cache/thumbnails</code>
                     </p>
                 </td>
             </tr>
             <tr>
-                <th><?php _e('Crop horizontal alignment', 'thumbnails') ?></th>
+                <th><?php esc_html_e('Crop horizontal alignment', 'thumbnails') ?></th>
                 <td>
                     <label>
                         <select name="options[crop_horizontal]">
                             <option value="center">Center</option>
-                            <option value="left" <?php echo $options['crop_horizontal'] == 'left'?'selected':''?>>Left</option>
-                            <option value="right" <?php echo $options['crop_horizontal'] == 'right'?'selected':''?>>Right</option>
+                            <option value="left" <?= $options['crop_horizontal'] == 'left' ? 'selected' : '' ?>>Left</option>
+                            <option value="right" <?= $options['crop_horizontal'] == 'right' ? 'selected' : '' ?>>Right</option>
                         </select>
                     </label>
                 </td>
             </tr>
             <tr>
-                <th><?php _e('Crop vertical alignment', 'thumbnails') ?></th>
+                <th><?php esc_html_e('Crop vertical alignment', 'thumbnails') ?></th>
                 <td>
                     <label>
                         <select name="options[crop_vertical]">
                             <option value="center">Middle</option>
-                            <option value="top" <?php echo $options['crop_vertical'] == 'top'?'selected':''?>>Top</option>
-                            <option value="bottom" <?php echo $options['crop_vertical'] == 'bottom'?'selected':''?>>Bottom</option>
+                            <option value="top" <?= $options['crop_vertical'] == 'top' ? 'selected' : '' ?>>Top</option>
+                            <option value="bottom" <?= $options['crop_vertical'] == 'bottom' ? 'selected' : '' ?>>Bottom</option>
                         </select>
                     </label>
                 </td>
             </tr>
             <tr>
-                <th><?php _e('Process even the core sizes', 'thumbnails') ?></th>
+                <th><?php esc_html_e('Process even the core sizes', 'thumbnails') ?></th>
                 <td>
                     <label>
-                        <input name="options[enable_core]" type="checkbox" <?php echo isset($options['enable_core']) ? 'checked' : ''; ?>> 
+                        <input name="options[enable_core]" type="checkbox" <?= isset($options['enable_core']) ? 'checked' : ''; ?>>
                     </label>
                     <p class="description">
-                        <a href="http://www.satollo.net/plugins/thumbnails" target="_blank"><?php _e('Read more', 'thumbnails') ?></a>.
+                        <a href="https://www.satollo.net/plugins/thumbnails" target="_blank"><?php esc_html_e('Read more', 'thumbnails') ?></a>.
                     </p>
                 </td>
             </tr>
         </table>
         <p>
-            <input type="submit" name="save" value="<?php _e('Save', 'thumbnails')?>" class="button-primary">
+            <input type="submit" name="save" value="<?php esc_attr_e('Save', 'thumbnails') ?>" class="button-primary">
         </p>
     </form>
 

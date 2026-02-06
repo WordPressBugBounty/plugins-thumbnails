@@ -1,8 +1,10 @@
-=== Thumbnails ===
-Tags: thumbnails, media
-Tested up to: 6.4.1
-Stable tag: 1.1.6
+=== Thumbnails and Featured Images ===
+Tags: thumbnails, media, resize
+Tested up to: 6.9
+Stable tag: 1.1.8
 Contributors: satollo
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Autoselect the featured image and creates pixel perfect resizes on the fly without regenerate all the thumbnails.
 
@@ -46,6 +48,15 @@ See the [Thumbnails](https://www.satollo.net/plugins/thumbnails) official page.
 No screenshots are available at this time.
 
 == Changelog ==
+
+= 1.1.8 =
+
+* Fixed readme
+
+= 1.1.7 =
+
+* WP 6.9 Check
+* PCP Check
 
 = 1.1.6 =
 
