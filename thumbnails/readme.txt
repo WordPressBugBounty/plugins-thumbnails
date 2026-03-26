@@ -1,7 +1,7 @@
 === Thumbnails and Featured Images ===
-Tags: thumbnails, media, resize
-Tested up to: 6.9
-Stable tag: 1.1.8
+Tags: featured image, media resize
+Tested up to: 6.9.1
+Stable tag: 1.1.9
 Contributors: satollo
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -27,6 +27,7 @@ Theme developers can find instructions to use it (no code tied to Thumbnails nee
 
 Other plugins by Stefano Lissa:
 
+* [Monitor](https://www.satollo.net/plugins/monitor)
 * [Hyper Cache](https://www.satollo.net/plugins/hyper-cache)
 * [Newsletter](https://www.thenewsletterplugin.com)
 * [Header and Footer](https://www.satollo.net/plugins/header-footer)
@@ -48,6 +49,10 @@ See the [Thumbnails](https://www.satollo.net/plugins/thumbnails) official page.
 No screenshots are available at this time.
 
 == Changelog ==
+
+= 1.1.9 =
+
+* Added the fallback feature image option
 
 = 1.1.8 =
 

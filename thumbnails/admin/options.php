@@ -15,11 +15,71 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && check_admin_referer('thumbnails-save
     }
 }
 $options = Thumbnails::$instance->options;
+
+wp_enqueue_media();
+
+$fallback_media_url = '';
+$fallback_media = wp_get_attachment_image_src($options['fallback_id'], 'thumbnail');
+if ($fallback_media) {
+    $fallback_media_url = $fallback_media[0];
+}
 ?>
 
 <style>
 <?php include __DIR__ . '/admin.css' ?>
 </style>
+
+<script>
+    jQuery(document).ready(function ($) {
+        var frame;
+        var $uploadBtn = $('#upload-media-button');
+        var $resetBtn = $('#reset-media-button');
+        var $preview = $('#media-preview');
+        var $input = $('#my-media-id');
+
+        $uploadBtn.on('click', function (e) {
+            e.preventDefault();
+
+            // If the frame already exists, reopen it.
+            if (frame) {
+                frame.open();
+                return;
+            }
+
+            // Create the media frame.
+            frame = wp.media({
+                title: 'Select Media',
+                button: {text: 'Use this media'},
+                multiple: false  // Set to true to allow multiple files
+            });
+
+            // When an image is selected in the media frame...
+            frame.on('select', function () {
+                var attachment = frame.state().get('selection').first().toJSON();
+
+                // 1. Store the ID in the hidden field
+                $input.val(attachment.id);
+
+                // 2. Show the thumbnail
+                var thumbUrl = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+                $preview.attr('src', thumbUrl).show();
+
+                // 3. Show reset button
+                $resetBtn.show();
+            });
+
+            frame.open();
+        });
+
+        // Reset Logic
+        $resetBtn.on('click', function (e) {
+            e.preventDefault();
+            $input.val('');
+            $preview.attr('src', '').hide();
+            $(this).hide();
+        });
+    });
+</script>
 
 <div class="wrap">
     <!-- Do not translate the name, please -->
@@ -70,7 +130,29 @@ $options = Thumbnails::$instance->options;
                     <label>
                         <input name="options[enable_autowire]" type="checkbox" <?= isset($options['enable_autowire']) ? 'checked' : ''; ?>>
                     </label>
+                    <p class="description">
+                        If the featured image for a post is missing, the first image of the post gallery is used.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <th><?php esc_html_e('Fall back featured image', 'thumbnails') ?></th>
+                <td>
 
+                    <div class="my-media-selector-wrapper">
+                        <div id="preview-container" style="margin-bottom: 10px;">
+                            <img id="media-preview" src="<?= esc_attr($fallback_media_url) ?>" style="max-width: 150px; display: <?= $fallback_media_url?'blocks':'none'?>;" />
+                        </div>
+
+                        <input type="hidden" name="options[fallback_id]" id="my-media-id" value="<?= (int) ($options['fallback_id'] ?? 0) ?>">
+
+                        <button type="button" class="button" id="upload-media-button">Select Image</button>
+                        <button type="button" class="button" id="reset-media-button" style="display: none;">Remove Image</button>
+                    </div>
+
+                    <p class="description">
+                        Image used when no featured image can be found elsewhere.
+                    </p>
                 </td>
             </tr>
             <tr>

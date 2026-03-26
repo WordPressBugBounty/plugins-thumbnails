@@ -6,12 +6,12 @@ defined('ABSPATH') || exit;
   Plugin Name: Thumbnails and Featured Images
   Plugin URI: https://www.satollo.net/plugins/thumbnails
   Description: Enhances the WordPress thumbnail functions generating and caching thumbnails of any size.
-  Version: 1.1.8
+  Version: 1.1.9
   Author: Stefano Lissa
   Author URI: https://www.satollo.net
   License: GPLv2 or later
   Requires at least: 6.1
-  Requires PHP: 7.0
+  Requires PHP: 7.4
  */
 
 class Thumbnails {
@@ -36,9 +36,10 @@ class Thumbnails {
                 add_filter('image_resize_dimensions', array($this, 'image_resize_dimensions'), 10, 6);
                 add_filter('image_downsize', array($this, 'image_downsize'), 10, 3);
             }
-            if (isset($this->options['enable_autowire'])) {
+            if (isset($this->options['enable_autowire']) || !empty($this->options['fallback_id'])) {
                 add_filter('get_post_metadata', array($this, 'get_post_metadata'), 10, 4);
             }
+            
         }
     }
 
@@ -83,7 +84,7 @@ class Thumbnails {
         } elseif ('right' === $x) {
             $s_x = $orig_w - $crop_w;
         } else {
-            $s_x = floor(( $orig_w - $crop_w ) / 2);
+            $s_x = floor(($orig_w - $crop_w) / 2);
         }
 
         if ('top' === $y) {
@@ -91,7 +92,7 @@ class Thumbnails {
         } elseif ('bottom' === $y) {
             $s_y = $orig_h - $crop_h;
         } else {
-            $s_y = floor(( $orig_h - $crop_h ) / 2);
+            $s_y = floor(($orig_h - $crop_h) / 2);
         }
 
         return array(0, 0, (int) $s_x, (int) $s_y, (int) $new_w, (int) $new_h, (int) $crop_w, (int) $crop_h);
@@ -100,6 +101,7 @@ class Thumbnails {
     function get_post_metadata($value, $post_id, $meta_key, $single) {
         static $is_recursing = false;
 
+        // This filter is called recurively due to the functions we use below
         if ($is_recursing || $meta_key !== '_thumbnail_id') {
             return $value;
         }
@@ -107,19 +109,28 @@ class Thumbnails {
         $is_recursing = true; // prevent this conditional when get_post_thumbnail_id() is called
         $value = get_post_thumbnail_id($post_id);
 
-        if (empty($value)) {
+        if (empty($value) && isset($this->options['enable_autowire'])) {
             $attachments = get_children(array('numberpost' => 1, 'post_parent' => $post_id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => 'ASC', 'orderby' => 'menu_order'));
             if (!empty($attachments)) {
                 foreach ($attachments as $id => &$attachment) {
                     $value = $id;
-                    if (isset($this->options['enable_persistence']))
+                    if (isset($this->options['enable_persistence'])) {
                         update_post_meta($post_id, $meta_key, $value);
+                    }
                     break;
                 }
             } else {
+                if (!empty($this->options['fallback_id'])) {
+                    return $this->options['fallback_id'];
+                }
                 // That avoids feature image search for posts which cannot have one
-                if (isset($this->options['enable_persistence']))
+                if (isset($this->options['enable_persistence'])) {
                     update_post_meta($post_id, $meta_key, 0);
+                }
+            }
+        } else {
+            if (!empty($this->options['fallback_id'])) {
+                return $this->options['fallback_id'];
             }
         }
 
@@ -241,7 +252,6 @@ class Thumbnails {
 
         return WP_CONTENT_URL . '/cache/thumbnails/' . $relative_thumb;
     }
-
 }
 
 new Thumbnails();
